@@ -1,28 +1,14 @@
 "use client"
-import AuthRedirect from '@/components/AuthRedirect'
 import axios from 'axios'
-import { error } from 'console'
 import { useFormik } from 'formik'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import React, { useEffect, useState } from 'react'
 import { ToastContainer, toast } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css';
-import * as Yup from 'yup'
 import styles from './styles.module.css'
-
-export const schema=Yup.object({
-  // email:Yup.string().email().required("Email is required"),
-  otp:Yup.string().min(4).max(4).required("Enter valid otp"),
-  newPassword: Yup.string()
-  .required("Enter password")
-  .matches(
-      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
-      "Password must have at least 8 characters, one uppercase, one lowercase, one digit, and one special character (#?!@$%^&*-)"
-  ),
-  confirmPassword:Yup.string().required("Confirm password").nullable().oneOf([Yup.ref("newPassword"),null],"Password should match")
-})
-
+import { resetschema } from '../schema/signschema'
+import { resetpasswordAPI } from '../services/api/common'
 
 const resetpassword = () => {
   const router=useRouter()
@@ -33,7 +19,7 @@ const resetpassword = () => {
   
 
     const [remainingTime, setRemainingTime] = useState(120);
-   let email=JSON.parse(localStorage.getItem("email")) 
+    let email=JSON.parse(localStorage.getItem("email"))
     const {values,errors,touched,handleBlur,handleChange,handleSubmit}=useFormik({
       initialValues: {
         email:email,
@@ -41,43 +27,20 @@ const resetpassword = () => {
         newPassword: "",
         confirmPassword: ""
     },
-      validationSchema:schema,
-      onSubmit:(values,action)=>{
+      validationSchema:resetschema,
+      onSubmit:async(values,action)=>{
              console.log(values)
-             
-             const  forgot = async() => {
-              await axios.
-              post("https://cart-app-ibuu.onrender.com/api/v1/user/reset-password",values,{
-                headers:{
-                  "Content-Type":'application/json'
-                }
-              })
-              .then((res)=>{
-               console.log(res.data.message)
-               let response=res?.data?.message
-               if(response==="Invalid OTP or OTP expired"){
-                toast.error(response)
-               }else if(response==="Email not found"){
-                toast.error(response)
-               }
-               else{
-                 localStorage.removeItem("reset")
-                 console.log("sucessfull")
-                 toast.success("Password updated Successfully")
-                 action.resetForm()
-                 setTimeout(() => {
-                   router.replace("/")           
-                 }, 3000);
-
-               }
-        
-            }).catch((error)=>{
-              toast.error("Please try again after some time")
-              console.log(error?.response?.data?.message)
-            
-              })
-            };
-            forgot()
+             const response=await resetpasswordAPI(values)
+             console.log(response)
+             if(response?.status===200){
+                  toast.success(response?.message)
+                  localStorage.removeItem("reset")
+                  setTimeout(() => {
+                    router.replace("/")
+                  }, 2000);
+             }else{
+              toast.error(response?.message)
+             }                
       }
     })
     useEffect(() => {

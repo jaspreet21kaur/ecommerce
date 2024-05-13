@@ -4,39 +4,9 @@ import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation'
 import React, { useEffect, useState } from 'react'
 import { toast } from 'react-toastify';
-
-
-
-interface ProductDetails {
-    productId: string;
-    productName: string;
-    productPrice: number;
-    productDescription: string;
-    productImage: string;
-}
-
-interface BuyerUser {
-    _id: string;
-    fullName: string;
-    email: string;
-}
-
-interface CartItem {
-    _id: string;
-    buyerUserId: BuyerUser;
-    productDetails: ProductDetails;
-    quantity: number;
-    createdAt: string;
-    updatedAt: string;
-    __v: number;
-    itemPrice: number;
-}
-
-interface ApiResponse {
-    cartItems: CartItem[];
-    totalCartAmount: number;
-}
-
+// import { checkout } from '@/app/checkout/page';
+import {loadStripe} from '@stripe/stripe-js'
+import {ApiResponse } from '@/app/types/userTypes';
 
 const page = () => {
     const {id}=useParams()
@@ -117,6 +87,7 @@ const page = () => {
         console.log(error?.response?.data?.message)
         })
      }
+   
   return (
     <>
     <Link href={'/user'}>
@@ -162,7 +133,7 @@ const page = () => {
 
         <Link href={`/user/pay/${el._id}`}>
           <button >Pay now</button>
-        </Link>
+         </Link>
         ))}
     </div>
     </>

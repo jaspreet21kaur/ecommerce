@@ -7,47 +7,10 @@ import AuthRedirect from "@/components/AuthRedirect"
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import Link from "next/link"
-
-interface Product {
-    _id:string
-    productName: string;
-    productPrice: string;
-    productImg: string;
-    productDescription:string
-    
-  }
-  
-  interface DashboardProps {}
-  var proid:any={
-    catergoryName:"",
-    productName:"",
-    productPrice:"",
-    productImage:"",
-    productdescription:""
-  }
-
-  interface category{
-      _id: string,
-      categoryName: string
-      categoryDescription: string
-      createdBy: string
-      createdAt: string
-      updatedAt: string
-      __v: number
-  
-  }
-
-
-  interface subcategory{
-      _id: string
-      subCategoryName:string
-      subCategoryDescription:string
-      categoryId:string
-      createdBy:string
-      createdAt: string
-      updatedAt: string
-
-  }
+import { category,Product,DashboardProps,subcategory } from "../types/userTypes"
+import { adminRoutes } from "../services/Api Routes"
+import { GetAllProductAPI, Getallcategories, Getallsubcategories, deleteadminproductApi, getcategorybyidAPI } from "../services/api/admin/products"
+import { getAdminAPI } from "../services/api/admin"
 export default function Dashboard(props: DashboardProps)  {
     const route=useRouter()
     const notify=()=>toast.success("Product created successfully")
@@ -74,34 +37,31 @@ export default function Dashboard(props: DashboardProps)  {
      const [categories,setcategories]= useState<category[]>([]);
      const [sub,setsub]=useState<subcategory[]>([])
 
- //logout user
+//logout user
   const logoutuser=()=>{
     localStorage.removeItem("userdata")
     localStorage.removeItem("token")
     localStorage.removeItem("user")
     route.replace("/")
     }
+
     const handlecategory = (name: string, id: string) => {
       setSelectedOption(name);
       getcategorybyid(id)
       console.log(`Selected category name: ${name}, ID: ${id}`);
     };
-const getcategorybyid=(id:string)=>{
-        const token=localStorage.getItem("token")
-        if(token){
-          axios
-          .get("https://cart-app-ibuu.onrender.com/api/v1/admin/get-category/"+id,{
-            headers:{
-              "Authorization":`Bearer ${token}`
-            }
-          }).then((res)=>{
-            console.log(res?.data)
-            subcategory(id)
-          }).catch((error)=>{
-            console.log(error)
-          })
-        }
-}
+    //get category by id
+    const getcategorybyid=async(id:string)=>{
+      const response=await getcategorybyidAPI(id)
+      if(response?.status===200){
+        subcategory(id)
+      }
+    else{
+      toast.error("error")
+    }
+    }
+
+    //create product form
     const handleSubmit = async (e: any) => {
       e.preventDefault();
       console.log(sub)
@@ -127,7 +87,7 @@ const getcategorybyid=(id:string)=>{
         if (storedToken) {
           try {
             const response = await axios.post(
-              `https://cart-app-ibuu.onrender.com/api/v1/admin/create-product`,
+           `${process.env.NEXT_PUBLIC_API_BASE_URL}+${adminRoutes.createproduct}`,
               formData,
               {
                 headers: {
@@ -152,6 +112,7 @@ const getcategorybyid=(id:string)=>{
       }
       
     }
+    //img validation function
     const handleImgChange = (e: any) => {
       const file = e.target.files[0];
       if (file) {
@@ -160,6 +121,7 @@ const getcategorybyid=(id:string)=>{
         setImg(null);
       }
     };
+    //imge update function
     const handleImgupdate = (e: any) => {
       const file = e.target.files[0];
       if (file) {
@@ -169,98 +131,64 @@ const getcategorybyid=(id:string)=>{
       }
     };
       
-    const fetchproducts=()=>{
-        const token=localStorage.getItem("token")
-        // console.log(token)
-        axios
-        .get("https://cart-app-ibuu.onrender.com/api/v1/admin/get-all-products",{
-            headers:{
-                "Authorization": `Bearer ${token}`
-              }
-        })
-        .then((res)=>{
-        //   console.log(res?.data?.data?.products)
-          setdata(res?.data?.data?.products)
-         
+    //fetch all products
+    const fetchproducts=async()=>{
+        const response=await GetAllProductAPI()
+        console.log(response)
+        if(response?.status===200){
+          setdata(response.data.products)
+        }
+        else{
+          toast.error("error")
+        }
+    }
+    //get all categories
+    const category=async()=>{
+      const response=await Getallcategories()
+      if(response?.status===200){
+        setcategories(response?.data)
+      }else{
+       toast.error("error")
+      }
+    }
+
+    //get all subcategories
+    const subcategory=async(id:string)=>{
+      const response=await Getallsubcategories(id)
+      if(response?.status===200){
+           setsub(response?.data.filter((el:any)=>el.categoryId==id))
+      }
+      else{
+        toast.error("error")
+      }
     
-      }).catch((error)=>{
-        console.log(error?.response?.data?.message)
-        })
     }
-    const category=()=>{
-      const token=localStorage.getItem("token")
-      if(token){
-        axios
-        .get("https://cart-app-ibuu.onrender.com/api/v1/admin/get-all-categories",{
-          headers:{
-            "Authorization":`Bearer ${token}`
-          }
-        })
-        .then((res)=>{
-          console.log(res?.data?.data)
-          setcategories(res?.data?.data)
-        }).catch((error)=>{
-          console.log(error)
-        })
+//getadmin info
+    const getadmin=async()=>{
+      const response=await getAdminAPI()
+      if(response?.status===200){
+        setname(response?.userData?.fullName)
+        setemail(response?.userData?.email)
+      }else{
+        toast.error("error")
       }
-    }
-    const subcategory=(id:string)=>{
-      const token=localStorage.getItem("token")
-      if(token){
-        axios
-        .get("https://cart-app-ibuu.onrender.com/api/v1/admin/get-all-sub-categories",{
-          headers:{
-            "Authorization":`Bearer ${token}`
-          }
-        })
-        .then((res)=>{
-          console.log(res?.data?.data)
-          setsub(res?.data?.data.filter((el:any)=>el.categoryId==id))
-        }).catch((error)=>{
-          console.log(error)
-        })
-      }
+    
     }
   useEffect(()=>{
+    getadmin()
      fetchproducts()
-     category()
-    const token=localStorage.getItem("token")
-    // console.log(token)
-    if(token){
-
-      axios
-      .get("https://cart-app-ibuu.onrender.com/api/v1/admin/get-admin",{
-          headers:{
-              "Authorization": `Bearer ${token}`
-            }
-      })
-      .then((res)=>{
-      //   console.log(res.data.userData)
-        setname(res?.data?.userData?.fullName)
-        setemail(res?.data?.userData?.email)
-  
-    }).catch((error)=>{
-      console.log(error?.response?.data?.message)
-      })
-    }
-  
-   
+     category() 
   },[])
-  const handledelete=(id:string)=>{
-     console.log(id)
-     const token=localStorage.getItem("token")
-     axios
-     .delete("https://cart-app-ibuu.onrender.com/api/v1/admin/delete-product/"+id,{
-         headers:{
-             "Authorization": `Bearer ${token}`
-           }
-     })
-     .then((res)=>{
-       console.log(res)
-       fetchproducts()
-   }).catch((error)=>{
-     console.log(error?.response?.data?.message)
-     })
+
+  const handledelete=async(id:string)=>{
+    const response=await deleteadminproductApi(id)
+    console.log("delete----------------",response)
+    if(response?.status===200){
+      toast.success("Product deleted successfully")
+      fetchproducts()
+    }else{
+      toast.error("Network error ")
+    }
   }
   const handleupdate=(e:any)=>{
     e.preventDefault()
@@ -280,8 +208,7 @@ const getcategorybyid=(id:string)=>{
         const token=localStorage.getItem("token")
         const id=localStorage.getItem("id")
        console.log(val)
-        axios.patch("https://cart-app-ibuu.onrender.com/api/v1/admin/update-product/"+id,
-        
+        axios.patch(process.env.NEXT_PUBLIC_API_BASE_URL+adminRoutes.adminupdateproduct+id,
         val
         ,
         {

@@ -1,17 +1,19 @@
 
 "use client"
 import Link from 'next/link';
-import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import React, {useState } from 'react';
 import AuthRedirect from '@/components/AuthRedirect';
 import { checkUserRole } from '../utils/authUtils';
 import {useRouter} from 'next/navigation'
-// import styles from "src/app/styles.module.css"
+import { UserType } from './types/userTypes';
+import { loginUserAPI} from './services/api/user';import auth from '@/config/auth';
+import { ToastContainer, toast } from 'react-toastify';
+;
 
 const Page = () => {
  const router=useRouter()
-   localStorage.removeItem("reset")
-   localStorage.removeItem("email")
+  localStorage.removeItem("reset")
+  localStorage.removeItem("email")
   const [err,seterr]=useState<string>("")
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
@@ -32,33 +34,35 @@ const Page = () => {
         password: password
       };
       
-      const fetchdata=async()=>{
-        await axios.
-        post("https://cart-app-ibuu.onrender.com/api/v1/login/user-login",values)
-        .then((res)=>{
+      const fetchdata=async(values:UserType)=>{
+        const isLoginData = await loginUserAPI(JSON.stringify(values))
+        console.log(isLoginData.token)
+        if (isLoginData?.status === 200) {
           seterr('')
-          localStorage.setItem("userdata",JSON.stringify(values))
-          localStorage.setItem("token",res.data.token)
+         localStorage.setItem("userdata",JSON.stringify(values))
+          localStorage.setItem(auth.storageTokenKeyName, isLoginData.token)
           const token = localStorage.getItem("token");
-            if (token) {
-              const role = checkUserRole(); 
-              if (role === "admin") {
-                router.replace('/admin');
-              } else if (role === "user") {
-                router.replace('/user');
-              }
-            }
-      }).catch((error)=>{
-          seterr(error?.response?.data?.message)
-        })
-
-       
+           if(token) {
+           const role = checkUserRole(); 
+          if (role === "admin") {
+          router.replace('/admin');
+          }else if (role === "user") {
+           router.replace('/user');
+           }
+          }
+          return isLoginData;
+        } else if (isLoginData?.status === 400) {
+          const { message } = isLoginData
+          toast.error(message);
+          return false;
+        }
+    
       }
-     fetchdata()
+       fetchdata(values)
       
     }
   };
- 
+
   return (
     <>
     <AuthRedirect/>
@@ -87,7 +91,7 @@ const Page = () => {
         </p>
       </form>
     </div>
-       
+       <ToastContainer/>
     </>
   );
 };
@@ -98,3 +102,7 @@ export function isValidEmail(email: string) {
 }
 
 export default Page;
+function fetchdata(values: any) {
+  throw new Error('Function not implemented.');
+}
+

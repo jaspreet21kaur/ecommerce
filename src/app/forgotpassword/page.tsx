@@ -8,6 +8,8 @@ import { ToastContainer, toast } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css';
 import styles from './styles.module.css'
 import Link from 'next/link'
+import { apiRoutes } from '../services/Api Routes'
+import { forgotpasswordAPI } from '../services/api/common'
 
 const forgotpassword = () => {
     const router=useRouter()
@@ -39,31 +41,22 @@ const forgotpassword = () => {
                 let val={
                  email:email
                 }
-                await axios.
-                post("https://cart-app-ibuu.onrender.com/api/v1/user/forget-password",val,{
-                  headers:{
-                    "Content-Type":'application/json'
-                  }
-                })
-                .then((res)=>{
-                 console.log(res.data.message)
-                 const response=res?.data?.message
-                 if(response==="Email not found"){
-                     seterror(response)
-                 }else{
-                    const yes="yes"
-                    localStorage.setItem("reset",yes)
-                    localStorage.setItem("email",JSON.stringify(email))
-                    setemail("")
-                      seterror("")
-                      console.log("replacing")
-                      router.replace("/resetpassword")
-                 }
-                 
-              }).catch((error)=>{
-                console.log(error?.response?.data?.message)
-              
-                })
+                const response=await forgotpasswordAPI(val)
+                console.log(response)
+                if(response?.status===200){
+                  const yes="yes"
+                   localStorage.setItem("reset",yes)
+                 localStorage.setItem("email",JSON.stringify(email))
+                   setemail("")
+                   seterror("")
+                    console.log("replacing")
+                    toast.success(response?.message)
+                    setTimeout(() => {
+                      router.replace("/resetpassword")   
+                    }, 2000);
+                }else{
+                  toast.error(response?.message)
+                }
               };
 
               forgot()

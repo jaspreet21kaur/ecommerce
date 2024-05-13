@@ -7,6 +7,9 @@ import axios from 'axios'
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import Link from 'next/link'
+import { apiRoutes} from '../services/Api Routes'
+import { GetAllProductAPI } from '../services/api/admin/products'
+import { addToCartAPI } from '../services/api/user'
 
 
 var val={}
@@ -25,27 +28,21 @@ const page = () => {
         router.replace("/")    
     }
   
-    const fetchproducts=()=>{
-      const token=localStorage.getItem("token")
-      axios
-      .get("https://cart-app-ibuu.onrender.com/api/v1/admin/get-all-products",{
-          headers:{
-              "Authorization": `Bearer ${token}`
-            }
-      })
-      .then((res)=>{
-        setData(res?.data?.data?.products)
-       
-  
-    }).catch((error)=>{
-      console.log(error?.response?.data?.message)
-      })
+  const fetchproducts=async()=>{
+         const allproducts=await GetAllProductAPI()
+        // console.log(allproducts.status)
+        if(allproducts?.status===200){
+          setData(allproducts?.data?.products)
+        }else{
+          toast.error("error")
+        }
   }
+
 useEffect(()=>{
    fetchproducts()
   const token=localStorage.getItem("token")
   axios
-  .get("https://cart-app-ibuu.onrender.com/api/v1/user/get-user",{
+  .get(process.env.NEXT_PUBLIC_API_BASE_URL+ apiRoutes.getUsers,{
       headers:{
           "Authorization": `Bearer ${token}`
         }
@@ -57,34 +54,22 @@ useEffect(()=>{
 }).catch((error)=>{
   console.log(error?.response?.data?.message)
   })
-
- 
 },[])
  const showdetail=()=>{
   console.log("show")
  }
 
-const addcart = async() => {
+const addcart = async(val:any) => {
   console.log(val)
   const notify = () => toast.success("Product added successfully");
-  const token=localStorage.getItem("token")
-  await axios.
-  post("https://cart-app-ibuu.onrender.com/api/v1/user/add-to-cart",val,{
-    headers:{
-      "Authorization":`Bearer ${token}`,
-      "Content-Type":'application/json'
-
-    }
-  })
-  .then((res)=>{
+  const response=await addToCartAPI(val)
+  console.log(response)
+  if(response?.status===200 || response?.status===201){
     notify()
-   console.log(res)
-   
-}).catch((error)=>{
-  
-  console.log(error?.response?.data?.message)
-
-  })
+  }else{
+    toast.error("error")
+  }
+ 
 };
   
   return (
@@ -147,7 +132,7 @@ const addcart = async() => {
                 productId:product._id,
                 productName:product.productName
               }
-              addcart()
+              addcart(val)
             }}>Add to bag</button>
             
             </div>

@@ -7,6 +7,9 @@ import React from 'react'
 import * as Yup from "yup"
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { adminRoutes } from '@/app/services/Api Routes'
+import { categoryschema } from '@/app/schema/signschema'
+import { createcategoryAPI } from '@/app/services/api/admin/category'
 
 
 
@@ -21,32 +24,18 @@ const page = () => {
     if(!token){
         router.replace("/")
     }
-
-    const schema=Yup.object({
-        categoryName:Yup.string().max(30).required("Enter category name"),
-        categoryDescription:Yup.string().max(40).required("Enter description")
-    })
     const {values,touched,errors,handleBlur,handleChange,handleSubmit}=useFormik({
        initialValues:val,
-       validationSchema:schema,
-       onSubmit:(values,action)=>{
+       validationSchema:categoryschema,
+       onSubmit:async(values,action)=>{
           console.log(values)
-          const token=localStorage.getItem("token")
-          if(token){
-            axios
-            .post("https://cart-app-ibuu.onrender.com/api/v1/admin/create-category",
-            values,
-            {
-                headers:{
-                    'Authorization':`Bearer ${token}`
-                }
-            }).then((res)=>{
-                console.log(res)
-                action.resetForm()
-                toast.success("Category created sucessfully")
-            }).catch((error)=>{
-                console.log(error)
-            })
+          const response=await createcategoryAPI(values)
+          console.log(response)
+          if(response?.status===200 || response?.status===201){
+            action.resetForm()
+            toast.success("Category created sucessfully")
+          }else{
+            toast.error("Network error")
           }
        }
     })

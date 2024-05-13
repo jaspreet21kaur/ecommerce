@@ -2,8 +2,9 @@
 import Link from 'next/link'
 import { useParams, useRouter } from 'next/navigation'
 import React, { ReactNode, useEffect, useState } from 'react'
-import styles from '/home/techno-user/day51/ecommerce/src/app/user/item/[id]/style.module.css'
 import axios from 'axios'
+import { addToCartAPI } from '@/app/services/api/user'
+import { cartRoutes } from '@/app/services/Api Routes'
 
 interface Product {
   productPrice: ReactNode
@@ -82,14 +83,13 @@ const page = () => {
          }
          if(token){
           axios
-          .post("https://cart-app-ibuu.onrender.com/api/v1/user/add-to-cart/",
+          .post(process.env.NEXT_PUBLIC_API_BASE_URL+cartRoutes.addToCart,
           val,
           {
             headers:{
               'Authorization':`Bearer ${token}`
             }
           }).then((res)=>{
-            // console.log(res)
             cartitems()
           }).catch((error)=>{
             console.log(error)
@@ -101,9 +101,9 @@ const page = () => {
   return (
     <>
     
-      <div className={styles.header}>
+      <div >
         <h1>{name}</h1>
-        <div className={styles.navigation}>
+        <div >
         <Link href={'/user/cart'}>
           <button >Cart</button>
           </Link>
@@ -115,18 +115,18 @@ const page = () => {
 
 
       {data && (
-  <div className={styles.card}>
-    <div className={styles.main} key={data._id}>
+  <div >
+    <div key={data._id}>
       <div>
-     <img className={styles.image} src={data.productImg} alt={data.productName} />
-      <div className={styles.below}>
-      {already ? <Link className={styles.button} href={'/user/cart'}>Go to bag</Link> : <button onClick={addtobag} className={styles.button}>Add to cart</button>}
-        <button className={styles.button}>Buy now</button>
+     <img  src={data.productImg} alt={data.productName} />
+      <div >
+      {already ? <Link  href={'/user/cart'}>Go to bag</Link> : <button onClick={addtobag}>Add to cart</button>}
+        <button >Buy now</button>
       </div>
       </div>
-     <div className={styles.detail}>
+     <div >
       <h2>{data.productName[0].toUpperCase()+data.productName.slice(1)}</h2>
-      <div className={styles.description}>
+      <div >
           <p>{data.productDescription}</p>
           <h2>Price-:${data.productPrice}</h2>
           <div>Grab it now and get best deals !</div>

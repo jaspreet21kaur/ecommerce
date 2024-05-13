@@ -7,31 +7,16 @@ import { useRouter } from 'next/navigation'
 import axios from 'axios'
 import { ToastContainer, toast } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css';
-
+import { CartItems } from '@/app/types/userTypes'
+import { cartRoutes } from '@/app/services/Api Routes'
 
 var removeid:string
-interface CartItem {
-    _id: string;
-    productDetails: {
-      productId: string
-      productImage: string;
-      productName: string;
-      productDescription: string;
-      productPrice: number;
-    
-    };
-    quantity: number;
-    totalCartAmount:number
-    itemPrice:number
-   
-  }
-  type QuantityState = number;
 const page:React.FC = () => {
     
     const router=useRouter()
 
     const [total,settotal]=useState("")
-    const [data, setdata] = useState<CartItem[]>([]);
+    const [data, setdata] = useState<CartItems[]>([]);
     const token=localStorage.getItem("token")
     const [modal,setmodal]=useState(false)
     if(!token){
@@ -40,7 +25,7 @@ const page:React.FC = () => {
     const fetchdata = async () => {
       const token = localStorage.getItem("token");
       try {
-        const response = await axios.get("https://cart-app-ibuu.onrender.com/api/v1/user/get-cart", {
+        const response = await axios.get(process.env.NEXT_PUBLIC_API_BASE_URL+cartRoutes.getAllCart, {
           headers: {
             "Authorization": `Bearer ${token}`
           }

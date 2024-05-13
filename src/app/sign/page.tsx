@@ -1,12 +1,14 @@
 "use client"
 import React, { useEffect, useState } from 'react';
-import * as Yup from "yup";
 import { useFormik } from 'formik';
 import Link from 'next/link';
 import AuthRedirect from '@/components/AuthRedirect';
 import { useRouter } from 'next/navigation';
-import axios from 'axios';
 import styles from './styles.module.css'
+import { signschema } from '../schema/signschema';
+import { registerUserAPI } from '../services/api/user';
+import { UserType } from '../types/userTypes';
+import { ToastContainer,toast } from 'react-toastify';
 
 const initialValues = {
   fullName: "",
@@ -14,19 +16,9 @@ const initialValues = {
   password: "",
   
 };
-
-
-export const schema = Yup.object({
-  fullName: Yup.string().required("Name is required"),
-  email: Yup.string().email("Invalid email").required("Email is required"),
-  password: Yup.string().required("Password is required"),
- 
-});
-
 const Sign =() => {
   localStorage.removeItem("reset")
   localStorage.removeItem("email")
-  let [err,seter]=useState("")
     const router=useRouter()
     const token=localStorage.getItem("token")
     if(!token){
@@ -35,32 +27,27 @@ const Sign =() => {
       AuthRedirect()
     }
     const [show,setshow]=useState(false)
-    const [msg,setmsg]=useState("")
     const [error,seterror]=useState("")
 const { values, touched, errors, handleBlur, handleChange, handleSubmit } = useFormik({
     initialValues: initialValues,
-    validationSchema: schema,
+    validationSchema: signschema,
     onSubmit:(values, action) => {
             seterror("")
-            fetchdata()
+            fetchdata(values)
    
 }})
 
-const fetchdata=async()=>{
-  await axios.
-  post("https://cart-app-ibuu.onrender.com/api/v1/user/register",values)
-  .then((res)=>{
-    seter('')
-    // console.log(res.data.message
-    seter(res?.data?.message)
-   router.replace("/")
-   localStorage.setItem("user",JSON.stringify(values))
-   
-}).catch((error)=>{
-   setshow(false)
-  // console.log(error?.response?.data?.message)
-    seter(error?.response?.data?.message)
-  })
+const fetchdata=async(values:UserType|string)=>{
+    const register=await registerUserAPI(values)
+    console.log(register.status)
+    if(register?.status===201){
+      router.replace("/")
+      localStorage.setItem("user",JSON.stringify(values))
+      return register
+    }else{
+      setshow(false) 
+    }
+
 }
 const check=()=>{
   if(localStorage.getItem("user")){
@@ -95,13 +82,13 @@ useEffect(()=>{
           {errors.password && touched.password ? <p className={styles.error}>{errors.password}</p> : null}
         </div>
         <p className={styles.error}>{error}</p>
-        <p className={styles.error}>{err}</p>
         <button type="submit" className={styles.submitButton}>Sign up</button>
         <Link href={'/'}>
           <button className={styles.loginButton}>Login</button>
         </Link>
       </form>
     </div>
+    <ToastContainer/>
   </div>
   );
 }

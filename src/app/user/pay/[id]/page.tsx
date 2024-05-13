@@ -1,39 +1,10 @@
 
 "use client"
+import { loadStripe } from '@stripe/stripe-js';
 import axios from 'axios'
 import { useParams, useRouter } from 'next/navigation'
 import React, { use, useEffect, useState } from 'react'
-
-
-interface ProductDetails {
-    productId: string;
-    productName: string;
-    productPrice: number;
-    productDescription: string;
-    productImage: string;
-}
-
-interface BuyerUser {
-    _id: string;
-    fullName: string;
-    email: string;
-}
-
-interface CartItem {
-    _id: string;
-    buyerUserId: BuyerUser;
-    productDetails: ProductDetails;
-    quantity: number;
-    createdAt: string;
-    updatedAt: string;
-    __v: number;
-    itemPrice: number;
-}
-
-interface ApiResponse {
-    cartItems: CartItem[];
-    totalCartAmount: number;
-}
+import { ApiResponse ,ProductDetails,BuyerUser,CartItem} from '@/app/types/userTypes';
 
 const page = () => {
     const {id}=useParams()
@@ -62,15 +33,14 @@ const page = () => {
             })
         }
     }
-   
-    
+
     const payment = (responseData: ApiResponse) => {
         const { cartItems, totalCartAmount } = responseData;
         if (cartItems.length > 0) {
             const { _id: cartId, productDetails, quantity } = cartItems[0];
             const { productId, productName, productPrice, productDescription } = productDetails;
 
-            const body = {
+            const bodydata = {
                 totalProduct: [{
                     cartId,
                     productId,
@@ -82,32 +52,46 @@ const page = () => {
                 totalCartAmount
             };
             
-            console.log(body);
-
-            const token = localStorage.getItem("token");
-            if (token) {
-                axios.post("https://cart-app-ibuu.onrender.com/api/v1/user/process-payment", body, {
-                    headers: {
-                        "Authorization": `Bearer ${token}`,
-                    }
-                }).then((res) => {
-                    console.log(res);
-                    router.replace("/user")
-                }).catch((error) => {
-                    console.log(error);
-                });
-            }
+            console.log(bodydata);
+            // const makepayment =async()=>{
+            //     const stripe=await loadStripe(process.env.NEXT_PUBLIC_API_KEY)
+            //     const body=bodydata
+            //     const headers={
+            //         'Content-Type':'appplication/josn'
+            //     }
+            //     const response=await fetch("https://cart-app-ibuu.onrender.com/api/v1/user/process-payment",{
+            //        method:'POST',
+            //        headers:headers,
+            //        body:JSON.stringify(body)
+            //     })
+            //     const session= await response.json()
+            //     const result=stripe?.redirectToCheckout({
+            //         sessionId:session.id
+            //     })
+            // }
+            // // const token = localStorage.getItem("token");
+            // // if (token) {
+            // //     axios.post("https://cart-app-ibuu.onrender.com/api/v1/user/process-payment", body, {
+            // //         headers: {
+            // //             "Authorization": `Bearer ${token}`,
+            // //         }
+            // //     }).then((res) => {
+            // //         console.log(res);
+            // //         router.replace("/user")
+            // //     }).catch((error) => {
+            // //         console.log(error);
+            // //     });
+            // // }
+            // makepayment()
         }
     }
-
     useEffect(() => {
         getcatbyid();
     }, []);
-    return (
-    
+    return (   
     <>
        <div>
-  {data.cartItems.map((el, index) => (
+  {/* {data.cartItems.map((el, index) => (
     <div key={index}>
       <div>
         <h1>Payment--Succesfull</h1>
@@ -120,10 +104,10 @@ const page = () => {
         {el.quantity}
       </p>
     </div>
-  ))}
+  ))} */}
   <div>
     <h2>Total Cart Amount</h2>
-    <h3>{data.totalCartAmount}</h3>
+    {/* <h3>{data.totalCartAmount}</h3> */}
   </div>
 </div>
 
