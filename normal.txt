@@ -1,0 +1,19 @@
+//    const data=localStorage.getItem("token")
+//     if(!data){
+//         router.replace("/")
+//     }else{
+//       const token=localStorage.getItem("token") || undefined
+//     if(token!==undefined){
+//       let decodedToken=jwt.decode(token) as { role: { role: string } } | null
+//       console.log("role====",decodedToken?.role?.role)
+//       if (decodedToken?.role?.role === 'user') {
+//         router.replace('/user');
+       
+//        } else if (decodedToken?.role?.role=== 'admin') {
+//         router.replace('/admin');
+       
+//        } else {
+//          router.replace("/")
+//       }
+//     }
+//   }

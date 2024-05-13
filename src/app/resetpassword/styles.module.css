@@ -1,0 +1,79 @@
+
+.container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  
+.resetPasswordForm {
+    width: 500px;
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+  }
+  
+  .formGroup {
+    margin-bottom: 15px;
+  }
+  
+ .formGroup label {
+    font-weight: bold;
+  }
+  
+ .formGroup input {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+  }
+  
+  .error {
+    color: red;
+    margin-top: 5px;
+  }
+  
+ .resetPasswordForm .submitButton {
+    width: 100%;
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    background-color: #007bff;
+    color: white;
+    cursor: pointer;
+  }
+  
+ .resetPasswordForm button {
+    border: none;
+    background: none;
+    color: blue;
+    cursor: pointer;
+  }
+  
+ .resetPasswordForm button:hover {
+    text-decoration: underline;
+  }
+  .otp {
+    border: none;
+    background: none;
+    color: blue;
+    cursor: pointer;
+    transition: transform 0.3s ease-in-out; 
+  }
+  
+ .otp:hover {
+    text-decoration: underline;
+    animation: bounce 0.5s; 
+  }
+  
+  @keyframes bounce {
+    0% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-5px)
+    }
+    100% {
+      transform: translateY(0);
+    }
+  }
