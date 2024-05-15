@@ -3,6 +3,7 @@ import { adminRoutes } from '@/app/services/Api Routes';
 import axiosInstance from '../../axiosInstance';
 
 
+
 export const getAdminAPI=async()=>{
     try{
         const response=await axiosInstance.get(adminRoutes.adminUsers)
@@ -11,3 +12,5 @@ export const getAdminAPI=async()=>{
         toast.error(err?.response?.data?.message || err?.message)
     }
 }
+
+

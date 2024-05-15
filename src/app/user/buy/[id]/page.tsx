@@ -1,12 +1,10 @@
 "use client"
-import axios from 'axios'
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation'
 import React, { useEffect, useState } from 'react'
 import { toast } from 'react-toastify';
-// import { checkout } from '@/app/checkout/page';
-import {loadStripe} from '@stripe/stripe-js'
 import {ApiResponse } from '@/app/types/userTypes';
+import { deleteQuantityAPI, getcartItemAPI, updatequantityAPI } from '@/app/services/api/user';
 
 const page = () => {
     const {id}=useParams()
@@ -16,22 +14,16 @@ const page = () => {
       router.replace("/")
     }
     const [data, setdata] = useState<ApiResponse>({ cartItems: [], totalCartAmount: 0 });
-    console.log(id)
+    // console.log(id)
     const cartid=id
-    const getcatbyid=()=>{
+    const getcatbyid=async()=>{
         console.log(cartid)
-        const token=localStorage.getItem("token")
-        if(token){
-            axios.get("https://cart-app-ibuu.onrender.com/api/v1/user/get-cart-item/"+cartid,{
-                headers:{
-                    "Authorization":`Bearer ${token}`
-                }
-            }).then((res)=>{
-                console.log(res?.data?.data)
-                setdata(res?.data?.data)
-            }).catch((error)=>{
-                console.log(error)
-            })
+        const response=await getcartItemAPI(cartid)
+        // console.log("response--------------",response)
+        if(response?.status===200){
+          setdata(response?.data)
+        }else{
+          toast.error(response?.message)
         }
     }
     useEffect(()=>{
@@ -46,46 +38,28 @@ const page = () => {
           productName:name,
           quantity:1
         }
-  
-        const token=localStorage.getItem("token")
-        await axios.
-        patch("https://cart-app-ibuu.onrender.com/api/v1/user/update-cart-item/"+cartid,val,{
-          headers:{
-            "Authorization":`Bearer ${token}`,
-            "Content-Type":'application/json'
-      
-          }
-        })
-        .then((res)=>{
-          getcatbyid()
-         console.log(res)
-         
-      }).catch((error)=>{
-        
-        console.log(error?.response?.data?.message)
-      
-        })
+       const response=await updatequantityAPI(cartid,val)
+       console.log("response",response)
+       if(response?.status===200){
+        getcatbyid()
+       }
+      else{
+        console.log("Error")
+      }
       };
 
-      const handledelete=(id:string,name:string)=>{
+      const handlequnatitydelete=async(id:string,name:string)=>{
         console.log(id)
-         let removeid=id
+        let removeid=id
         toast.success(`Product ${name}--quantity decreased by 1`)
-        const token=localStorage.getItem("token")
-        axios
-        .delete("https://cart-app-ibuu.onrender.com/api/v1/user/remove-cart-item/"+removeid,{
-            headers:{
-                "Authorization": `Bearer ${token}`
-              }
-        })
-        .then((res)=>{
-           
-            console.log(res)
-            getcatbyid()
-      }).catch((error)=>{
-        // fetchdata()
-        console.log(error?.response?.data?.message)
-        })
+        const response=await deleteQuantityAPI(removeid)
+        console.log("delete",response)
+        if(response?.status===200){
+          getcatbyid()
+        }else{
+          toast.error(response?.message)
+        }
+       
      }
    
   return (
@@ -107,7 +81,7 @@ const page = () => {
       </div>
       <p>
         Quantity :
-        <button disabled={el.quantity === 1} onClick={() => handledelete(el._id, el.productDetails.productName)}>-</button>
+        <button disabled={el.quantity === 1} onClick={() => handlequnatitydelete(el._id, el.productDetails.productName)}>-</button>
         {el.quantity}
         <button onClick={() => updatequantity(el.productDetails.productId, el.productDetails.productName, el._id)}>+</button>
       </p>
@@ -131,7 +105,7 @@ const page = () => {
         </div>
         {data.cartItems.map((el,index)=>(
 
-        <Link href={`/user/pay/${el._id}`}>
+        <Link key={index} href={`/user/pay/${el._id}`}>
           <button >Pay now</button>
          </Link>
         ))}

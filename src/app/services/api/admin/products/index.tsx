@@ -2,7 +2,9 @@ import { ToastContainer, toast } from 'react-toastify';
 import axiosInstance from "../../../axiosInstance"
 import { adminRoutes } from '@/app/services/Api Routes';
 import { formdata } from '@/app/types/userTypes';
-import { AxiosRequestConfig } from 'axios';
+import axios, { AxiosRequestConfig } from 'axios';
+import auth from '@/config/auth';
+import { headers } from 'next/headers';
 
 export const GetAllProductAPI = async () =>{
     try {
@@ -55,18 +57,19 @@ export const deleteadminproductApi=async(id:string)=>{
     }
 }
 
-const config: AxiosRequestConfig = {
-    headers: {
-      'Content-Type': 'multipart/form-data', 
-    },
-  };
+const token=localStorage.getItem(auth.storageTokenKeyName)
 
-
-export const adminCreateProductApi=async(data?:formdata)=>{
+export const adminCreateProductApi=async(formdata:any)=>{
       try{
-        const response=await axiosInstance.post(adminRoutes.createproduct,data,config)
-        console.log("createapi=-----------",response.data)
+        const response=await axios.post(adminRoutes.createproduct,formdata,{
+            headers:{
+                'Authorization':`Bearer ${token}`,
+                'Content-Type': 'multipart/form-data'
+            }
+        })
+        console.log("createapi=-----------",formdata)
       }catch(err:any){
+        console.log("createapi-----------",formdata,err)
         toast.error(err?.response?.data?.message || err?.message)
     }
 }

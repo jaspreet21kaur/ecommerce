@@ -36,7 +36,7 @@ const Page = () => {
       
       const fetchdata=async(values:UserType)=>{
         const isLoginData = await loginUserAPI(JSON.stringify(values))
-        console.log(isLoginData.token)
+        // console.log(isLoginData?.token)
         if (isLoginData?.status === 200) {
           seterr('')
          localStorage.setItem("userdata",JSON.stringify(values))
@@ -66,30 +66,34 @@ const Page = () => {
   return (
     <>
     <AuthRedirect/>
-    <div >
-      <h1>Welcome to the web page</h1>
+    <div className='flex justify-center items-center flex-col m-4 p-4 gap-3'>
+      <div className='bg-gray-50 p-10 rounded-md'>
       <form onSubmit={handleSubmit} >
-        <div >
-          <label htmlFor="email">Email</label>
-          <input type="email" placeholder="Enter email" name="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+        <div className='flex gap-2 flex-col p-3 m-3'>
+          <label htmlFor="email" className='text-xl font-bold'>Email <span className='text-red-400'>*</span></label>
+          <input type="email"className='px-4 py-3 shadow-md rounded-md' placeholder="Enter email" name="email" value={email} onChange={(e) => setEmail(e.target.value)} />
         </div>
-        <div>
-          <label htmlFor="password">Password</label>
-          <input type="password" placeholder="Enter password" name="password" value={password} onChange={(e) => setPassword(e.target.value)} />
+        <div  className='flex gap-2 flex-col p-3 m-3'>
+          <label  className='text-xl font-bold' htmlFor="password">Password <span className='text-red-400'>*</span></label>
+          <input className='px-4 py-3 shadow-md rounded-md w-full' type="password" placeholder="Enter password" name="password" value={password} onChange={(e) => setPassword(e.target.value)} />
         </div>
-        <p >{error}</p>
-        <p >{err}</p>
-        <button type="submit">Login</button>
+        <p className='text-red-400'>{error}</p>
+        <p className='text-red-400'>{err}</p>
+        <button type="submit" className='m-3 mr-3 px-3 py-2 bg-green-600 rounded-md w-[95%] text-white'>Login</button>
+        <div className='flex flex-col justify-center items-center'>
         <Link href={'/forgotpassword'}>
-          <p >Forgot password ?</p>
+          <p className=' text-md  text-blue-500 underline'>Forgot password ?</p>
         </Link>
-        <p >
+        <p className='font-light'>
           Don't have an account? 
           <Link href={'/sign'}>
-            <button >Sign in</button>
+            <button className='bg-blue-600 text-white rounded-md px-2 py-1 mx-2 text-md'>Sign in</button>
           </Link>
         </p>
+
+        </div>
       </form>
+      </div>
     </div>
        <ToastContainer/>
     </>

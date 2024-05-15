@@ -31,7 +31,7 @@
     productImage:"",
     productdescription:""
   }
-  export interface formdata{
+  export type formdata={
     catergoryName:string
     subCategoryName:string
     productName:string
@@ -95,7 +95,7 @@ export interface ApiResponse {
 }
 
 export type addToCartType = {
-  productId:string,
+  productId:string|string[]
   productName:string
 }
 
@@ -121,4 +121,36 @@ export type resetpassword={
   otp:string
   newPassword: string
   confirmPassword: string
+}
+
+export type updatequantity={
+  productId:string
+  productName:string
+  quantity:number
+}
+
+export type payment = {
+  totalProduct: [
+    {
+      cartId:string
+      productId:string
+      productName:string
+      productPrice:number
+      itemPrice:number
+      productDescription:string
+      productQuantity: number
+  }
+],
+  totalCartAmount:number
+};
+
+export type pay={
+ totalProduct:[{
+  cartId: string;
+  productId: string;
+  productName: string;
+  productPrice: number;
+  productDescription: string;
+  productQuantity: number;
+}]
 }

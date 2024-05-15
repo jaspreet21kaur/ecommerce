@@ -28,20 +28,21 @@ axiosInstance.interceptors.request.use(
   }
 )
 
-axiosInstance.interceptors.response.use(
-  response => {
-    return response
-  },
-  error => {
-    if (error.response?.status === 401 || 404) {
-      console.log("storedToken undefined",error.response)
-      if (typeof window !== 'undefined'){
-        console.log("storedToken undefined")
-        window.location.replace('/')
-      }
-    }
-    return Promise.reject(error)
-  }
-)
+
+// axiosInstance.interceptors.response.use(
+//   response => {
+//     return response
+//   },
+//   error => {
+//     if (error.response?.status === 401 || 404) {
+//         console.log("error",error.response)
+//       if (typeof window !== 'undefined'){
+//         console.log("storedToken undefined")
+//         // window.location.replace('/')
+//       }
+//     }
+//     return Promise.reject(error)
+//   }
+// )
 
 export default axiosInstance

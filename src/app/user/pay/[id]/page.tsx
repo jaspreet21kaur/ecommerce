@@ -3,8 +3,10 @@
 import { loadStripe } from '@stripe/stripe-js';
 import axios from 'axios'
 import { useParams, useRouter } from 'next/navigation'
-import React, { use, useEffect, useState } from 'react'
-import { ApiResponse ,ProductDetails,BuyerUser,CartItem} from '@/app/types/userTypes';
+import React, {  useEffect, useState } from 'react'
+import { ApiResponse , payment} from '@/app/types/userTypes';
+import { createPaymentAPI } from '@/app/services/api/payment';
+import { CircularProgress } from '@nextui-org/react';
 
 const page = () => {
     const {id}=useParams()
@@ -13,9 +15,8 @@ const page = () => {
     if(!token){
         router.replace("/")
     }
-    console.log(id)
+    // console.log(id)
     const payId=id
-    const [data, setdata] = useState<ApiResponse>({ cartItems: [], totalCartAmount: 0 });
     const getcatbyid= async()=>{
           
         const token=localStorage.getItem("token")
@@ -25,8 +26,7 @@ const page = () => {
                     "Authorization":`Bearer ${token}`
                 }
             }).then((res)=>{
-                console.log(res?.data)
-                setdata(res?.data?.data) 
+                // console.log(res?.data)
                 payment(res?.data?.data)               
             }).catch((error)=>{
                 console.log(error)
@@ -34,83 +34,65 @@ const page = () => {
         }
     }
 
-    const payment = (responseData: ApiResponse) => {
+
+
+    const payment = async(responseData: ApiResponse,) => {
         const { cartItems, totalCartAmount } = responseData;
         if (cartItems.length > 0) {
-            const { _id: cartId, productDetails, quantity } = cartItems[0];
+            const { _id: cartId, productDetails, quantity,itemPrice } = cartItems[0];
             const { productId, productName, productPrice, productDescription } = productDetails;
-
-            const bodydata = {
-                totalProduct: [{
-                    cartId,
-                    productId,
-                    productName,
-                    productPrice,
-                    productDescription,
-                    productQuentity: quantity
-                }],
-                totalCartAmount
-            };
+            const bodydata: payment= {
+              totalProduct: [
+                  {
+                      cartId: cartId,
+                      productId: productId,
+                      productName: productName,
+                      productPrice: productPrice,
+                      productDescription: productDescription,
+                      productQuantity: quantity,
+                      itemPrice:itemPrice
+                  }
+              ],
+              totalCartAmount: totalCartAmount
+          };
             
             console.log(bodydata);
-            // const makepayment =async()=>{
-            //     const stripe=await loadStripe(process.env.NEXT_PUBLIC_API_KEY)
-            //     const body=bodydata
-            //     const headers={
-            //         'Content-Type':'appplication/josn'
-            //     }
-            //     const response=await fetch("https://cart-app-ibuu.onrender.com/api/v1/user/process-payment",{
-            //        method:'POST',
-            //        headers:headers,
-            //        body:JSON.stringify(body)
-            //     })
-            //     const session= await response.json()
-            //     const result=stripe?.redirectToCheckout({
-            //         sessionId:session.id
-            //     })
-            // }
-            // // const token = localStorage.getItem("token");
-            // // if (token) {
-            // //     axios.post("https://cart-app-ibuu.onrender.com/api/v1/user/process-payment", body, {
-            // //         headers: {
-            // //             "Authorization": `Bearer ${token}`,
-            // //         }
-            // //     }).then((res) => {
-            // //         console.log(res);
-            // //         router.replace("/user")
-            // //     }).catch((error) => {
-            // //         console.log(error);
-            // //     });
-            // // }
-            // makepayment()
-        }
+            if (process.env.NEXT_PUBLIC_API_KEY) {
+              const stripe = await loadStripe(process.env.NEXT_PUBLIC_API_KEY);
+              const response=await createPaymentAPI(bodydata)
+              if (response?.status === 201) {
+                const session = await response
+                console.log(session.sessionId);
+                const result = await stripe?.redirectToCheckout({
+                    sessionId: session.sessionId,
+
+                });
+                if (result?.error) {
+                    
+                    console.error("Error redirecting to Checkout:", result.error);
+                } else {
+                    console.log("Redirecting to Checkout...");
+                    
+                }
+            } else {
+                
+                console.error("Unexpected response status:", response?.status);
+            }
+            
+          } else {
+              console.error("NEXT_PUBLIC_API_KEY is undefined");
+             
+          }
+          
+        
     }
+  }
     useEffect(() => {
         getcatbyid();
     }, []);
     return (   
     <>
-       <div>
-  {/* {data.cartItems.map((el, index) => (
-    <div key={index}>
-      <div>
-        <h1>Payment--Succesfull</h1>
-        <h1>{el.productDetails.productName}</h1>
-        <p>{el.productDetails.productDescription}</p>
-        <img src={el.productDetails.productImage} width="50%" height="50%" alt={el.productDetails.productName} />
-      </div>
-      <p>
-        Quantity :
-        {el.quantity}
-      </p>
-    </div>
-  ))} */}
-  <div>
-    <h2>Total Cart Amount</h2>
-    {/* <h3>{data.totalCartAmount}</h3> */}
-  </div>
-</div>
-
+    <CircularProgress />
     </>
   )
 }

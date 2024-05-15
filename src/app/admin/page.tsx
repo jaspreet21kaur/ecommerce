@@ -9,7 +9,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import Link from "next/link"
 import { category,Product,DashboardProps,subcategory } from "../types/userTypes"
 import { adminRoutes } from "../services/Api Routes"
-import { GetAllProductAPI, Getallcategories, Getallsubcategories, deleteadminproductApi, getcategorybyidAPI } from "../services/api/admin/products"
+import { GetAllProductAPI, Getallcategories, Getallsubcategories, adminCreateProductApi, deleteadminproductApi, getcategorybyidAPI } from "../services/api/admin/products"
 import { getAdminAPI } from "../services/api/admin"
 export default function Dashboard(props: DashboardProps)  {
     const route=useRouter()
@@ -80,10 +80,9 @@ export default function Dashboard(props: DashboardProps)  {
         if (productImg) {
           formData.append('productImg', productImg);
         }
-    
+        // const respose=await adminCreateProductApi(formData)
+     
         const storedToken = window.localStorage.getItem('token');
-        // console.log("token ==>", storedToken);
-    
         if (storedToken) {
           try {
             const response = await axios.post(

@@ -31,5 +31,6 @@ export const cartRoutes = {
     removeCartQuantity:"user/remove-cart-item/"
 }
 export const payments = {
-    createPayment:"/user/process-payments"
+    createPayment:"/user/process-payment",
+    allPayment:"/user/get-payment-details"
 }
